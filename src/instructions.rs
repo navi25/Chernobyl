@@ -1,19 +1,20 @@
-use std::fs::read_to_string;
+use crate::num;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, FromPrimitive)]
 pub enum Opcode {
-    HALT,
-    LOAD,
-    ILLEGAL
+    HALT = 0,
+    LOAD = 1,
+    ADD = 2,
+    SUB = 3,
+    MUL = 4,
+    DIV = 5,
+    ILLEGAL = 255
 }
 
 impl From<u8> for Opcode {
     fn from(v : u8) -> Opcode {
-        match v {
-            0 => return Opcode::HALT,
-            1 => return Opcode::LOAD,
-            _ => return Opcode::ILLEGAL
-        }
+        let opcode = num::FromPrimitive::from_u8(v);
+        return opcode.unwrap_or(Opcode::ILLEGAL);
     }
 }
 
@@ -49,6 +50,11 @@ mod tests {
         assert_eq!(instruction.opcode, Opcode::HALT);
     }
 
+    #[test]
+    fn test_opcode_match(){
+        assert_eq!(Opcode::HALT,Opcode::from(0));
+        assert_eq!(Opcode::ILLEGAL,Opcode::from(255));
+    }
 }
 
 

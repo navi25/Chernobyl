@@ -1,10 +1,12 @@
 use crate::instructions::*;
 
+
 #[derive(Debug)]
 pub struct VM{
     registers: [i32; 32], // defining array of 32 size with i32 data type
     program : Vec<u8>, // actual program bytes
-    pc: usize // program counter
+    pc: usize, // program counter
+    remainder : u32
 }
 
 
@@ -13,7 +15,8 @@ impl VM{
         VM {
             registers: [0; 32], // initialised the array with 0
             program: vec![],
-            pc: 0
+            pc: 0,
+            remainder: 0
         }
     }
 
@@ -24,17 +27,44 @@ impl VM{
         }
     }
 
+    pub fn run_once(&mut self){
+        self.execute_instruction();
+    }
+
     pub fn execute_instruction(&mut self) -> bool{
 
         if self.pc >= self.program.len(){
             return true;
         }
+
         match self.decode_opcode() {
             Opcode::LOAD => {
                 let register = self.next_8_bits() as usize;
                 let number = self.next_16_bits() as u16;
                 self.registers[register] = number as i32;
-                return false;
+            },
+            Opcode::ADD => {
+                let register1 = self.registers[self.next_8_bits() as usize];
+                let register2 = self.registers[self.next_8_bits() as usize];
+                self.registers[self.next_8_bits() as usize] = register1 + register2;
+            },
+            Opcode::SUB => {
+                let register1 = self.registers[self.next_8_bits() as usize];
+                let register2 = self.registers[self.next_8_bits() as usize];
+                self.registers[self.next_8_bits() as usize] = register1 - register2;
+
+            },
+            Opcode::MUL => {
+                let register1 = self.registers[self.next_8_bits() as usize];
+                let register2 = self.registers[self.next_8_bits() as usize];
+                self.registers[self.next_8_bits() as usize] = register1 * register2;
+
+            },
+            Opcode::DIV => {
+                let register1 = self.registers[self.next_8_bits() as usize];
+                let register2 = self.registers[self.next_8_bits() as usize];
+                self.registers[self.next_8_bits() as usize] = register1 / register2;
+                self.remainder = (register1 % register2) as u32;
             },
             Opcode::HALT => {
                 println!("HLT Encountered!");
@@ -45,6 +75,8 @@ impl VM{
                 return true;
             }
         }
+
+        false
 
     }
 
