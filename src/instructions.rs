@@ -1,10 +1,19 @@
 #[derive(Debug, PartialEq)]
 pub enum Opcode {
     HLT, // Halt
-    IGL
+    IGL // Illegal
 }
 
+impl From<u8> for Opcode {
+    fn from(v : u8) -> Opcode {
+        match v {
+            0 => return Opcode::HLT,
+            _ => return Opcode::IGL
+        }
+    }
+}
 
+#[derive(Debug, PartialEq)]
 pub struct Instruction {
     opcode : Opcode
 }
