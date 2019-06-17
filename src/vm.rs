@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct VM{
     registers: [i32; 32] // defining array of 32 size with i32 data type
 }
