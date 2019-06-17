@@ -1,14 +1,18 @@
+use std::fs::read_to_string;
+
 #[derive(Debug, PartialEq)]
 pub enum Opcode {
-    HLT, // Halt
-    IGL // Illegal
+    HALT,
+    LOAD,
+    ILLEGAL
 }
 
 impl From<u8> for Opcode {
     fn from(v : u8) -> Opcode {
         match v {
-            0 => return Opcode::HLT,
-            _ => return Opcode::IGL
+            0 => return Opcode::HALT,
+            1 => return Opcode::LOAD,
+            _ => return Opcode::ILLEGAL
         }
     }
 }
@@ -22,7 +26,7 @@ impl Instruction {
 
     pub fn new(opcode : Opcode) -> Instruction {
         Instruction {
-            opcode : opcode
+            opcode
         }
     }
 }
@@ -35,14 +39,14 @@ mod tests {
 
     #[test]
     fn test_create_hlt() {
-        let opcode = Opcode::HLT;
-        assert_eq!(opcode, Opcode::HLT);
+        let opcode = Opcode::HALT;
+        assert_eq!(opcode, Opcode::HALT);
     }
 
     #[test]
     fn test_create_instruction(){
-        let instruction = Instruction::new(Opcode::HLT);
-        assert_eq!(instruction.opcode, Opcode::HLT);
+        let instruction = Instruction::new(Opcode::HALT);
+        assert_eq!(instruction.opcode, Opcode::HALT);
     }
 
 }
