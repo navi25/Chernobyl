@@ -44,27 +44,35 @@ impl VM{
                 self.registers[register] = number as i32;
             },
             Opcode::ADD => {
-                let register1 = self.registers[self.next_8_bits() as usize];
-                let register2 = self.registers[self.next_8_bits() as usize];
-                self.registers[self.next_8_bits() as usize] = register1 + register2;
+                let register = self.next_8_bits() as usize;
+                let num1 = self.next_8_bits() as u8;
+                let num2 = self.next_8_bits() as u8;
+                let sum = num1 + num2;
+                self.registers[register] = sum as i32;
             },
             Opcode::SUB => {
-                let register1 = self.registers[self.next_8_bits() as usize];
-                let register2 = self.registers[self.next_8_bits() as usize];
-                self.registers[self.next_8_bits() as usize] = register1 - register2;
-
+                let register = self.next_8_bits() as usize;
+                let num1 = self.next_8_bits() as u8;
+                let num2 = self.next_8_bits() as u8;
+                let diff = num1 - num2;
+                self.registers[register] = diff as i32;
             },
             Opcode::MUL => {
-                let register1 = self.registers[self.next_8_bits() as usize];
-                let register2 = self.registers[self.next_8_bits() as usize];
-                self.registers[self.next_8_bits() as usize] = register1 * register2;
+                let register = self.next_8_bits() as usize;
+                let num1 = self.next_8_bits() as u8;
+                let num2 = self.next_8_bits() as u8;
+                let product = num1 * num2;
+                self.registers[register] = product as i32;
 
             },
             Opcode::DIV => {
-                let register1 = self.registers[self.next_8_bits() as usize];
-                let register2 = self.registers[self.next_8_bits() as usize];
-                self.registers[self.next_8_bits() as usize] = register1 / register2;
-                self.remainder = (register1 % register2) as u32;
+                let register = self.next_8_bits() as usize;
+                let num1 = self.next_8_bits() as u8;
+                let num2 = self.next_8_bits() as u8;
+                let quotient = num1 / num2;
+                let remainder = num1%num2;
+                self.registers[register] = quotient as i32;
+                self.remainder = remainder as u32;
             },
             Opcode::HALT => {
                 println!("HLT Encountered!");
@@ -135,6 +143,58 @@ mod tests {
         test_vm.program = test_bytes;
         test_vm.run();
         assert_eq!(test_vm.registers[0],500);
-
     }
+
+    #[test]
+    fn test_add_opcode() {
+        let mut test_vm = VM::new();
+        let add_u8 = Opcode::ADD as u8;
+        let test_bytes = vec![add_u8,1,2,1]; // add and store in register 1, num1 = 2, num2 =1
+        test_vm.program = test_bytes;
+        test_vm.run_once();
+        assert_eq!(test_vm.registers[1],3);
+    }
+
+    #[test]
+    fn test_sub_opcode() {
+        let mut test_vm = VM::new();
+        let sub_u8 = Opcode::SUB as u8;
+        let test_bytes = vec![sub_u8,1,2,1]; // add and store in register 1, num1 = 2, num2 =1
+        test_vm.program = test_bytes;
+        test_vm.run_once();
+        assert_eq!(test_vm.registers[1],1);
+    }
+
+    #[test]
+    fn test_mul_opcode() {
+        let mut test_vm = VM::new();
+        let mul_u8 = Opcode::MUL as u8;
+        let test_bytes = vec![mul_u8,1,2,1]; // add and store in register 1, num1 = 2, num2 =1
+        test_vm.program = test_bytes;
+        test_vm.run_once();
+        assert_eq!(test_vm.registers[1],2);
+    }
+
+    #[test]
+    fn test_div_opcode() {
+        let mut test_vm = VM::new();
+        let div_u8 = Opcode::DIV as u8;
+        let test_bytes = vec![div_u8,1,4,2]; // add and store in register 1, num1 = 2, num2 =1
+        test_vm.program = test_bytes;
+        test_vm.run_once();
+        assert_eq!(test_vm.registers[1],2);
+    }
+
+    #[test]
+    fn test_div_opcode_with_remainder() {
+        let mut test_vm = VM::new();
+        let div_u8 = Opcode::DIV as u8;
+        let test_bytes = vec![div_u8,1,5,2]; // add and store in register 1, num1 = 2, num2 =1
+        test_vm.program = test_bytes;
+        test_vm.run_once();
+        assert_eq!(test_vm.registers[1],2);
+        assert_eq!(test_vm.remainder,1);
+    }
+
+
 }
