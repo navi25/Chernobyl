@@ -8,6 +8,9 @@ pub enum Opcode {
     SUB = 3,
     MUL = 4,
     DIV = 5,
+    JMP = 6,
+    JMPF = 7,
+    JMPB = 8,
     ILLEGAL = 255
 }
 

@@ -1,6 +1,5 @@
 use crate::instructions::*;
 
-
 #[derive(Debug)]
 pub struct VM{
     registers: [i32; 32], // defining array of 32 size with i32 data type
@@ -73,6 +72,24 @@ impl VM{
                 let remainder = num1%num2;
                 self.registers[register] = quotient as i32;
                 self.remainder = remainder as u32;
+            },
+            Opcode::JMP => {
+                let target = self.next_8_bits() as usize;
+                if target> self.program.len() {
+                    return false;
+                }
+                self.pc = target;
+            },
+            Opcode::JMPF => {
+                let target = self.next_8_bits() as usize;
+                if self.pc + target > self.program.len() {
+                    return false;
+                }
+                self.pc += target;
+            },
+            Opcode::JMPB => {
+                let target = self.next_8_bits() as usize;
+                self.pc -= target;
             },
             Opcode::HALT => {
                 println!("HLT Encountered!");
@@ -194,6 +211,39 @@ mod tests {
         test_vm.run_once();
         assert_eq!(test_vm.registers[1],2);
         assert_eq!(test_vm.remainder,1);
+    }
+
+    #[test]
+    fn test_jmp_opcode() {
+        let mut test_vm = VM::new();
+        let jmp_u8 = Opcode::JMP as u8;
+        let add_u8 = Opcode::ADD as u8;
+        let test_bytes = vec![jmp_u8,5,0,0,0, add_u8,1,1,2]; // add and store in register 1, num1 = 2, num2 =1
+        test_vm.program = test_bytes;
+        test_vm.run();
+        assert_eq!(test_vm.registers[1],3);
+    }
+
+    #[test]
+    fn test_jmpf_opcode() {
+        let mut test_vm = VM::new();
+        let jmpf_u8 = Opcode::JMPF as u8;
+        let add_u8 = Opcode::ADD as u8;
+        let test_bytes = vec![add_u8,0,1,2,jmpf_u8,2,0,0,add_u8,1,1,2]; // add and store in register 1, num1 = 2, num2 =1
+        test_vm.program = test_bytes;
+        test_vm.run();
+        assert_eq!(test_vm.registers[1],3);
+    }
+
+    #[test]
+    fn test_jmpb_opcode() {
+        let mut test_vm = VM::new();
+        let jmpb_u8 = Opcode::JMPB as u8;
+        let add_u8 = Opcode::ADD as u8;
+        let test_bytes = vec![add_u8,0,1,2,add_u8,0,1,3, jmpb_u8,5]; // add and store in register 1, num1 = 2, num2 =1
+        test_vm.program = test_bytes;
+        test_vm.run();
+        assert_eq!(test_vm.registers[0],4);
     }
 
 
