@@ -5,7 +5,8 @@ pub struct VM{
     registers: [i32; 32], // defining array of 32 size with i32 data type
     program : Vec<u8>, // actual program bytes
     pc: usize, // program counter
-    remainder : u32
+    remainder : u32,
+    equal_flag: bool
 }
 
 
@@ -15,7 +16,8 @@ impl VM{
             registers: [0; 32], // initialised the array with 0
             program: vec![],
             pc: 0,
-            remainder: 0
+            remainder: 0,
+            equal_flag: false
         }
     }
 
@@ -90,6 +92,27 @@ impl VM{
             Opcode::JMPB => {
                 let target = self.next_8_bits() as usize;
                 self.pc -= target;
+            },
+            Opcode::EQ => {
+                let num1 = self.next_8_bits() as usize;
+                let num2 = self.next_8_bits() as usize;
+                if num1 == num2 {
+                    self.equal_flag = true;
+                }else {
+                    self.equal_flag = false;
+                }
+            },
+            Opcode::JEQ => {
+                let target = self.next_8_bits() as usize;
+                if self.equal_flag {
+                    self.pc = target;
+                }
+            },
+            Opcode::JNEQ => {
+                let target = self.next_8_bits() as usize;
+                if !self.equal_flag {
+                    self.pc = target;
+                }
             },
             Opcode::HALT => {
                 println!("HLT Encountered!");
@@ -244,6 +267,50 @@ mod tests {
         test_vm.program = test_bytes;
         test_vm.run();
         assert_eq!(test_vm.registers[0],4);
+    }
+
+    #[test]
+    fn test_eq_opcode_equal() {
+        let mut test_vm = VM::new();
+        let eq_u8 = Opcode::EQ as u8;
+        let test_bytes = vec![eq_u8,23,23];
+        test_vm.program = test_bytes;
+        test_vm.run();
+        assert_eq!(test_vm.equal_flag,true);
+    }
+
+    #[test]
+    fn test_eq_opcode_not_equal() {
+        let mut test_vm = VM::new();
+        let eq_u8 = Opcode::EQ as u8;
+        let test_bytes = vec![eq_u8,20,23];
+        test_vm.program = test_bytes;
+        test_vm.run();
+        assert_eq!(test_vm.equal_flag,false);
+    }
+
+    #[test]
+    fn test_jeq_opcode_equal() {
+        let mut test_vm = VM::new();
+        let jeq_u8 = Opcode::JEQ as u8;
+        let add_u8 = Opcode::ADD as u8;
+        test_vm.equal_flag = true;
+        let test_bytes = vec![jeq_u8,3,0,add_u8,1,2,3];
+        test_vm.program = test_bytes;
+        test_vm.run();
+        assert_eq!(test_vm.registers[1],5);
+    }
+
+    #[test]
+    fn test_jeq_opcode_not_equal() {
+        let mut test_vm = VM::new();
+        let jeq_u8 = Opcode::JEQ as u8;
+        let add_u8 = Opcode::ADD as u8;
+        test_vm.equal_flag = false;
+        let test_bytes = vec![jeq_u8,3,0,add_u8,1,2,3];
+        test_vm.program = test_bytes;
+        test_vm.run();
+        assert_ne!(test_vm.registers[1],5);
     }
 
 

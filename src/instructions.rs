@@ -11,6 +11,9 @@ pub enum Opcode {
     JMP = 6,
     JMPF = 7,
     JMPB = 8,
+    EQ = 9,
+    JEQ = 10,
+    JNEQ = 11,
     ILLEGAL = 255
 }
 
